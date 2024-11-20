@@ -47,10 +47,20 @@ jobs:
               with:
                 python-version: '3.x'
 
+            - name: Setup node
+              uses: actions/setup-node@v4
+              with:
+                node-version: '20'
+                cache: 'npm'
+
             - name: Download artifact
               uses: actions/download-artifact@v4
               with:
                 name: jar
+
+            # Nodeの脆弱性のチェックは事前にnpm ciが必要
+            - name: Npm install
+              run: npm ci
 
             - name: Check artifact
               uses: dependency-check/Dependency-Check_Action@main
@@ -66,4 +76,8 @@ jobs:
             - name: Check results
               run: |
                 BODY=$(gh issue view $ISSUE_NUMBER --json body | jq -c '.body')
-                echo ${BODY}
+                sed -r 's/.*___GITHUB_ACTIONS_DATA__ (.*)-->.*/\1/' <<< $BODY > issue.json
+                echo "issue.json"
+                cat issue.json
+                echo "dependency-check-report.json"
+                cat /github/workspace/reports/dependency-check-report.json
