@@ -55,13 +55,12 @@ jobs:
               uses: dependency-check/Dependency-Check_Action@main
               with:
                 project: 'practice-maven'
-                path: |
-                    *.jar
-                    package.json
+                path: '*.jar'
                 format: 'JSON'
                 args: |
                     --disableAssembly
-                    --suppression '.github/suppression.xml'
+                    --suppression .github/suppression.xml
+                    --scan package.json
 
             - name: Check results
               run: |
