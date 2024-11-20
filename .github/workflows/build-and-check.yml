@@ -91,4 +91,4 @@ jobs:
  
             - name: Edit issue
               run: |
-                gh issue $ISSUE_NUMBER edit --body-file body.txt
+                gh issue edit $ISSUE_NUMBER --body-file body.txt
