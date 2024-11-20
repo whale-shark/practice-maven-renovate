@@ -80,4 +80,4 @@ jobs:
                 echo "issue.json"
                 cat issue.json
                 echo "dependency-check-report.json"
-                cat /github/workspace/reports/dependency-check-report.json
+                cat ${{github.workspace}}/reports/dependency-check-report.json
