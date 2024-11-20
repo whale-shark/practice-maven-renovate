@@ -2,8 +2,7 @@ import sys
 import json
 
 # 今回の脆弱性の結果から、Issueの本文を作成する
-# owasp_json_file = open(sys.argv[1], 'r')
-owasp_json_file = open('dependency-check-report.json', 'r')
+owasp_json_file = open(sys.argv[1], 'r')
 owasp_data = json.load(owasp_json_file)
 
 output = {}
