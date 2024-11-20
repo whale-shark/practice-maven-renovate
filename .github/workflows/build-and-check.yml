@@ -6,6 +6,9 @@ defaults:
     run:
         shell: bash
 
+env:
+    ISSUE_NUMBER: 5
+
 jobs:
     build:
         runs-on: ubuntu-20.04
@@ -13,7 +16,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
-            - name: Setup Java
+            - name: Setup java
               uses: actions/setup-java@v4
               with:
                 distribution: 'corretto'
@@ -32,12 +35,35 @@ jobs:
     vulnerability-check:
         runs-on: ubuntu-20.04
         needs: build
+        permissions:
+            issues: write
         steps:
-            - name: Download Artifact
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup python
+              uses: actions/setup-python@v5
+              with:
+                python-version: '3.x'
+
+            - name: Download artifact
               uses: actions/download-artifact@v4
               with:
                 name: jar
-            - name: Check Artifact
+
+            - name: Check artifact
+              uses: dependency-check/Dependency-Check_Action@main
+              with:
+                project: 'practice-maven'
+                path: |
+                    *.jar
+                    package.json
+                format: 'JSON'
+                args: |
+                    --disableAssembly
+                    --suppression '.github/suppression.xml'
+
+            - name: Check results
               run: |
-                echo "$ ls"
-                ls
+                BODY=$(gh issue view $ISSUE_NUMBER --json body | jq -c '.body')
+                echo ${BODY}
