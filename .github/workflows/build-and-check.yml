@@ -72,12 +72,23 @@ jobs:
                     --disableAssembly
                     --suppression .github/suppression.xml
                     --scan package.json
-
-            - name: Check results
+                
+            - name: Get issue
               run: |
                 BODY=$(gh issue view $ISSUE_NUMBER --json body | jq -c '.body')
                 sed -r 's/.*___GITHUB_ACTIONS_DATA__ (.*)-->.*/\1/' <<< $BODY > issue.json
-                echo "issue.json"
-                cat issue.json
-                echo "dependency-check-report.json"
-                cat ${{github.workspace}}/reports/dependency-check-report.json
+
+            - name: Check results
+              run: |
+                # 前回との差分を取得する
+                python3 .github/diff.py issue.json ${{github.workspace}}/reports/dependency-check-report.json diff.json
+                # 差分がある場合は出力する
+                python3 .github/print_diff.py diff.json
+                # 差分でCVSSスコアが8以上ある脆弱性がある場合はコメントする
+                python3 .github/alert_diff.py diff.json
+                # 今回の診断結果をIssueにコメントする情報を作成する
+                python3 .github/create_issue_body.py ${{github.workspace}}/reports/dependency-check-report.json > body.txt
+ 
+            - name: Edit issue
+              run: |
+                gh issue $ISSUE_NUMBER edit --body-file body.txt
