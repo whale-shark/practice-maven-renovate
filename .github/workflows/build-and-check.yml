@@ -8,6 +8,7 @@ defaults:
 
 env:
     ISSUE_NUMBER: 5
+    GH_TOKEN: ${{ github.token }}
 
 jobs:
     build:
