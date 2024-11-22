@@ -62,6 +62,15 @@ jobs:
               run: |
                 gh issue view $ISSUE_NUMBER --json body | jq -c '.body' --raw-output | grep '___GITHUB_ACTIONS_DATA__' | sed -r 's/.*___GITHUB_ACTIONS_DATA__ (.*)-->.*/\1/' > issue.json
 
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: json
+                path: |
+                    issue.json
+                    ${{github.workspace}}/reports/dependency-check-report.html
+                    ${{github.workspace}}/reports/dependency-check-report.json
+
             - name: Check results
               run: |
                 # 前回との差分を取得する
