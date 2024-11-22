@@ -12,7 +12,9 @@ env:
 
 jobs:
     build:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
+        permissions:
+            issues: write
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -23,24 +25,6 @@ jobs:
                 distribution: 'corretto'
                 java-version: '21'
                 cache: maven
-
-            - name: Build
-              run: ./mvnw -B package --file pom.xml
-
-            - name: Upload artifact
-              uses: actions/upload-artifact@v4
-              with:
-                name: jar
-                path: |
-                    target/*.jar
-    vulnerability-check:
-        runs-on: ubuntu-20.04
-        needs: build
-        permissions:
-            issues: write
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
 
             - name: Setup python
               uses: actions/setup-python@v5
@@ -53,25 +37,24 @@ jobs:
                 node-version: '20'
                 cache: 'npm'
 
-            - name: Download artifact
-              uses: actions/download-artifact@v4
-              with:
-                name: jar
-
             # Nodeの脆弱性のチェックは事前にnpm ciが必要
             - name: Npm install
               run: npm ci
+
+            - name: Build
+              run: ./mvnw -B package --file pom.xml
 
             - name: Check artifact
               uses: dependency-check/Dependency-Check_Action@main
               with:
                 project: 'practice-maven'
-                path: '*.jar'
+                path: 'package.json'
                 format: 'JSON'
                 args: |
                     --disableAssembly
                     --suppression .github/suppression.xml
-                    --scan package.json
+                    --scan 'target/*.jar'
+                    --format HTML
                 
             - name: Get issue
               run: |
@@ -92,3 +75,10 @@ jobs:
             - name: Edit issue
               run: |
                 gh issue edit $ISSUE_NUMBER --body-file body.txt
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: report
+                path: |
+                    ${{github.workspace}}/reports/dependency-check-report.html
