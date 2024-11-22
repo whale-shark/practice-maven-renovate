@@ -60,8 +60,7 @@ jobs:
                 
             - name: Get issue
               run: |
-                BODY=$(gh issue view $ISSUE_NUMBER --json body | jq -c '.body')
-                sed -r 's/.*___GITHUB_ACTIONS_DATA__ (.*)-->.*/\1/' <<< $BODY > issue.json
+                gh issue view $ISSUE_NUMBER --json body | jq -c '.body' --raw-output | grep '___GITHUB_ACTIONS_DATA__' | sed -r 's/.*___GITHUB_ACTIONS_DATA__ (.*)-->.*/\1/' > issue.json
 
             - name: Check results
               run: |
