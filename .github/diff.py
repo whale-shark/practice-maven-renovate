@@ -31,14 +31,14 @@ for dependency in owasp_data['dependencies']:
         # 脆弱性単位で登録されているかチェック
         for vulnerability in dependency['vulnerabilities']:
             # issue_dataのfileNameと一致するデータがあるかチェック
-            issue = next((x for x in issue_data if x['fileName'] == dependency['fileName']), None)
-            if issue != None:
+            issue_key = next((x for x in issue_data if x == dependency['fileName']), None)
+            if issue_key != None:
                 # データがある場合は、脆弱性の名前やCVE番号が一致しているかチェック
-                if vulnerability['name'] not in issue['vulnerabilities']:
+                if vulnerability['name'] not in issue_data[issue_key]['vulnerabilities']:
                     appendOutput(dependency, vulnerability, 'new')
                 # 名前は一致しているがCVE番号が異なる場合は、新たに登録された脆弱性として扱う
-                elif any(vulnerability['name'] in issue['vulnerabilities']['name']):
-                    if getCvssScore(vulnerability) != getCvssScore(issue['vulnerabilities']):
+                elif any(vulnerability['name'] in issue_data[issue_key]['vulnerabilities']['name']):
+                    if getCvssScore(vulnerability) != getCvssScore(issue_data[issue_key]['vulnerabilities']):
                         appendOutput(dependency, vulnerability, 'update')
             else:
                 # データがないので新規の脆弱性
