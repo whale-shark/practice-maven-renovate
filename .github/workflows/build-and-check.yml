@@ -55,7 +55,7 @@ jobs:
                 args: |
                     --disableAssembly
                     --suppression .github/suppression.xml
-                    --scan 'target/*.jar'
+                    --scan target/*.jar
                     --format HTML
                 
             - name: Get issue
